@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bacon's Arcade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-wrap">
+          <div class="brand-mark">B</div>
+          <div>
+            <p class="eyebrow">Arcade portal</p>
+            <h1>Bacon's Arcade</h1>
+          </div>
+        </div>
+
+        <nav class="topnav" aria-label="Main navigation">
+          <button class="nav-tab active" data-tab="games">All Games</button>
+          <button class="nav-tab" data-tab="favorites">My Catalog</button>
+          <button class="nav-tab" data-tab="browser">Browser</button>
+        </nav>
+      </header>
+
+      <main class="main-panel">
+        <section id="games-panel" class="tab-panel active">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Featured collection</p>
+              <h2>Game Catalog</h2>
+            </div>
+          </div>
+          <div id="games-grid" class="games-grid"></div>
+        </section>
+
+        <section id="favorites-panel" class="tab-panel">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Saved picks</p>
+              <h2>My Catalog</h2>
+            </div>
+          </div>
+          <div id="favorites-grid" class="games-grid"></div>
+        </section>
+
+        <section id="browser-panel" class="tab-panel">
+          <div class="browser-shell">
+            <form id="browser-form" class="browser-bar">
+              <label class="sr-only" for="site-url">Website URL</label>
+              <input
+                id="site-url"
+                type="url"
+                placeholder="https://example.com"
+                autocomplete="off"
+              />
+              <button type="submit">Visit</button>
+            </form>
+
+            <div class="browser-viewport">
+              <iframe id="browser-frame" title="Bacon's Arcade browser" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

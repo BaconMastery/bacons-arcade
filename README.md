@@ -1,2 +1,7 @@
-# bacons-arcade
-A web proxy arcade with games, favorites, and web browsing capabilities
+# Node
+node_modules/
+.env
+npm-debug.log*
+
+# OS
+.DS_Store

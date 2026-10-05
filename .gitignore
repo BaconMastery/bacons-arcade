@@ -1,0 +1,167 @@
+const storageKey = 'bacons-arcade-favorites';
+const state = {
+  favorites: JSON.parse(localStorage.getItem(storageKey) || '[]'),
+  activeTab: 'games'
+};
+
+const gamesGrid = document.getElementById('games-grid');
+const favoritesGrid = document.getElementById('favorites-grid');
+const tabs = document.querySelectorAll('.nav-tab');
+const panels = document.querySelectorAll('.tab-panel');
+const browserForm = document.getElementById('browser-form');
+const siteUrlInput = document.getElementById('site-url');
+const browserFrame = document.getElementById('browser-frame');
+
+async function loadGames() {
+  const response = await fetch('/api/games');
+  const games = await response.json();
+  renderGames(games);
+}
+
+function renderGames(games) {
+  gamesGrid.innerHTML = games
+    .map((game) => {
+      const isFavorite = state.favorites.includes(game.id);
+
+      return `
+        <article class="game-card">
+          <div class="game-hero">
+            <div class="game-icon" aria-hidden="true">${game.icon}</div>
+            <span class="game-tag">${game.category}</span>
+          </div>
+
+          <div class="game-body">
+            <h3>${game.name}</h3>
+            <p class="game-description">${game.description}</p>
+
+            <div class="details-box">
+              <h4>How to Play</h4>
+              <ul>
+                ${game.guide.map((step) => `<li>${step}</li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="details-box">
+              <h4>Controls</h4>
+              <ul>
+                ${game.controls.map((control) => `<li>${control}</li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="card-actions">
+              <button class="favorite-btn ${isFavorite ? 'is-favorite' : ''}" data-game-id="${game.id}">
+                ${isFavorite ? '★ Favorited' : '☆ Favorite'}
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    })
+    .join('');
+
+  renderFavorites();
+
+  document.querySelectorAll('.favorite-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      toggleFavorite(button.dataset.gameId);
+    });
+  });
+}
+
+function renderFavorites() {
+  const favorites = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+  if (!favorites.length) {
+    favoritesGrid.innerHTML = '<div class="empty-state">No saved games yet. Favorite a game and it will appear here.</div>';
+    return;
+  }
+
+  fetch('/api/games')
+    .then((response) => response.json())
+    .then((games) => {
+      const savedGames = games.filter((game) => favorites.includes(game.id));
+
+      favoritesGrid.innerHTML = savedGames
+        .map((game) => {
+          return `
+            <article class="game-card">
+              <div class="game-hero">
+                <div class="game-icon" aria-hidden="true">${game.icon}</div>
+                <span class="game-tag">${game.category}</span>
+              </div>
+
+              <div class="game-body">
+                <h3>${game.name}</h3>
+                <p class="game-description">${game.description}</p>
+
+                <div class="details-box">
+                  <h4>How to Play</h4>
+                  <ul>
+                    ${game.guide.map((step) => `<li>${step}</li>`).join('')}
+                  </ul>
+                </div>
+
+                <div class="details-box">
+                  <h4>Controls</h4>
+                  <ul>
+                    ${game.controls.map((control) => `<li>${control}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+            </article>
+          `;
+        })
+        .join('');
+    })
+    .catch(() => {
+      favoritesGrid.innerHTML = '<div class="empty-state">Unable to load your catalog right now.</div>';
+    });
+}
+
+function toggleFavorite(gameId) {
+  const favorites = JSON.parse(localStorage.getItem(storageKey) || '[]');
+  const updated = favorites.includes(gameId)
+    ? favorites.filter((id) => id !== gameId)
+    : [...favorites, gameId];
+
+  localStorage.setItem(storageKey, JSON.stringify(updated));
+  state.favorites = updated;
+  loadGames();
+}
+
+function setActiveTab(tabName) {
+  state.activeTab = tabName;
+
+  tabs.forEach((tab) => {
+    tab.classList.toggle('active', tab.dataset.tab === tabName);
+  });
+
+  panels.forEach((panel) => {
+    panel.classList.toggle('active', panel.id === `${tabName}-panel`);
+  });
+}
+
+function openSite(url) {
+  try {
+    const parsed = new URL(url);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error('Unsupported protocol');
+    }
+    browserFrame.src = `/proxy?url=${encodeURIComponent(url)}`;
+  } catch {
+    alert('Enter a valid http or https URL to open a website.');
+  }
+}
+
+tabs.forEach((tab) => {
+  tab.addEventListener('click', () => setActiveTab(tab.dataset.tab));
+});
+
+browserForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  openSite(siteUrlInput.value.trim());
+});
+
+siteUrlInput.value = 'https://example.com';
+openSite('https://example.com');
+loadGames();
